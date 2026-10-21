@@ -1,10 +1,8 @@
 {
-  "name": "quickbite-vercel",
-  "version": "1.0.0",
+  "name": "quickbite-postgres-vercel",
+  "version": "2.0.0",
   "private": true,
-  "description": "QuickBite food delivery demo deployable on Vercel",
+  "description": "QuickBite food delivery coursework project with Vercel serverless APIs and PostgreSQL persistence",
   "engines": { "node": ">=20" },
-  "dependencies": {
-    "neo4j-driver": "^5.28.1"
-  }
+  "dependencies": { "pg": "^8.16.3" }
 }

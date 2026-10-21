@@ -55,7 +55,10 @@ let db;try{db=JSON.parse(localStorage.getItem('qb2'))}catch(e){}if(!db||!db.revi
 let saveQueue=Promise.resolve();
 let remoteEnabled=false;
 const save=()=>{const snapshot=JSON.stringify(db);try{localStorage.setItem('qb2',snapshot)}catch(e){};
-  if(remoteEnabled){saveQueue=saveQueue.then(()=>fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:snapshot}).then(r=>{if(!r.ok)throw Error('Cloud save failed');return r.json()}).catch(e=>{console.warn('QuickBite cloud save unavailable; browser copy retained.',e)}));}
+  if(remoteEnabled){saveQueue=saveQueue.then(()=>fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:snapshot}))
+    .then(async r=>{if(!r.ok){let detail='';try{detail=(await r.json()).error||''}catch(e){}throw Error(detail||'Cloud save failed');}return r.json();})
+    .then(result=>{window.__qbCloudLastSave='ok';return true;})
+    .catch(e=>{window.__qbCloudLastSave='error';console.warn('QuickBite PostgreSQL save failed:',e);toast('Cloud database save failed. Your change is only in this browser: '+e.message,false);return false;});}
 };
 const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=s=>document.querySelector(s),fm=n=>'₹'+Number(n).toFixed(2),by=(t,id)=>db[t].find(r=>r.id==id);
@@ -199,9 +202,9 @@ async function boot(){
   if(remoteEnabled){
     try{
       const r=await fetch('/api/state');
-      if(r.ok){const remote=await r.json();if(remote&&remote.customer&&remote.restaurant&&remote.food){db=remote;try{localStorage.setItem('qb2',JSON.stringify(db))}catch(e){};draw();toast('Connected to cloud database');return;}}
+      if(r.ok){const remote=await r.json();if(remote&&remote.customer&&remote.restaurant&&remote.food){db=remote;try{localStorage.setItem('qb2',JSON.stringify(db))}catch(e){};draw();toast('Connected to PostgreSQL database');return;}}
       const h=await fetch('/api/health');
-      if(h.ok){draw();save();toast('Initial data saved to cloud database');return;}
+      if(h.ok){draw();save();saveQueue.then(ok=>{if(ok)toast('Initial data saved to PostgreSQL');});return;}
     }catch(e){console.warn('QuickBite cloud database unavailable; using browser copy.',e);}
   }
   draw();

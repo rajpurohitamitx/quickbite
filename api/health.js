@@ -1,21 +1,20 @@
-const { getDriver } = require('../lib/neo4j');
+const { getPool, ensureSchema } = require('../lib/postgres');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'GET') return res.status(405).json({ ok: false, error: 'Method not allowed' });
-  const driver = getDriver();
-  if (!driver) return res.status(503).json({ ok: false, error: 'Database is not configured' });
+  const pool = getPool();
+  if (!pool) return res.status(503).json({ ok: false, error: 'PostgreSQL is not configured. Add POSTGRES_URL or DATABASE_URL in Vercel.' });
+  let client;
   try {
-    await driver.verifyConnectivity();
-    const session = driver.session({ database: process.env.NEO4J_DATABASE || 'neo4j' });
-    try {
-      await session.run('CREATE CONSTRAINT quickbite_state_key IF NOT EXISTS FOR (s:QuickBiteState) REQUIRE s.key IS UNIQUE');
-    } finally {
-      await session.close();
-    }
-    return res.status(200).json({ ok: true, database: 'Neo4j' });
+    client = await pool.connect();
+    await ensureSchema(client);
+    await client.query('SELECT 1');
+    return res.status(200).json({ ok: true, database: 'PostgreSQL', tablesReady: true });
   } catch (error) {
-    console.error('QuickBite health check failed:', error.message);
-    return res.status(503).json({ ok: false, error: 'Database connection failed. Check the Vercel environment variables.' });
+    console.error('QuickBite PostgreSQL health check failed:', error.message);
+    return res.status(503).json({ ok: false, error: 'Database connection failed. Check the Vercel PostgreSQL connection string.' });
+  } finally {
+    if (client) client.release();
   }
 };
