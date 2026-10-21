@@ -1,0 +1,212 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>QuickBite – Food Delivery</title>
+<style>
+:root{--bg:#faf7f2;--sf:#fff;--tx:#1f1b16;--mu:#7a7064;--ac:#e4572e;--ac2:#fff;--bd:#e9e2d6;--ok:#1f8a4c;--er:#c62828}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#17130f;--sf:#221d18;--tx:#f3ede4;--mu:#a89d8e;--bd:#383027;--ok:#4cc27e;--er:#ff7b72}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#17130f;--sf:#221d18;--tx:#f3ede4;--mu:#a89d8e;--bd:#383027;--ok:#4cc27e;--er:#ff7b72}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}main,header{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--bd);background:var(--sf);flex-wrap:wrap}
+.logo{font-weight:800;font-size:20px;color:var(--ac);cursor:pointer}nav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+nav button{background:none;border:0;padding:8px 14px;border-radius:99px;color:var(--mu);font:inherit;cursor:pointer}nav button.on{background:var(--ac);color:var(--ac2)}
+main{max-width:1050px;margin:0 auto;padding:20px}
+h2{margin:0 0 4px}.s{color:var(--mu);margin:0 0 14px}
+.hero{background:var(--ac);color:var(--ac2);border-radius:18px;padding:28px;margin-bottom:18px}.hero h2{font-size:28px}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.two{display:grid;grid-template-columns:1fr 340px;gap:20px}@media(max-width:800px){.two{grid-template-columns:1fr}}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:14px}
+.rc{cursor:pointer}.rc:hover{border-color:var(--ac)}.em{font-size:34px}
+.food{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--bd)}
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--bd);color:var(--mu)}
+.btn,.q button{border:1px solid var(--bd);background:var(--sf);color:var(--tx);border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit}
+.btn.p{background:var(--ac);color:var(--ac2);border-color:var(--ac);font-weight:600}.btn.w{width:100%;padding:10px}
+.q{display:flex;align-items:center;gap:8px}
+input,select,textarea{font:inherit;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);color:var(--tx);width:100%;margin:4px 0 10px}
+label{font-size:12px;color:var(--mu)}.row{display:flex;justify-content:space-between;padding:3px 0}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13.5px}th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--bd);white-space:nowrap}th{color:var(--mu)}
+td select,td input{margin:0;padding:3px 6px;width:auto}.ed{cursor:pointer}.ed:hover{background:var(--bd)}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}.tabs .btn.on{background:var(--tx);color:var(--bg)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}.stat b{display:block;font-size:24px}
+.st{padding:2px 8px;border-radius:99px;font-size:12px;background:var(--bd)}
+.steps{display:flex;gap:6px;margin:12px 0}.steps div{flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:var(--bd);color:var(--mu);font-size:13px}.steps .on{background:var(--ok);color:#fff}
+.er{color:var(--er)}.ok{color:var(--ok)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:10px 16px;border-radius:10px;color:#fff;z-index:9;max-width:90%}
+</style>
+<title>QuickBite</title>
+<header><span class="logo" onclick="go('home')">🍛 QuickBite</span><nav id="nav"></nav></header>
+<main id="app"></main>
+<script>
+const COLS={customer:['id','name','email','phone','address'],restaurant:['id','name','cuisine','rating','city'],food:['id','name','price','category','available','rid'],discount:['id','code','pct','expiry'],orders:['id','cid','did','total','status','date'],cart:['id','oid','fid','qty'],payment:['id','oid','method','status','amount'],delivery:['id','oid','partner','status','address'],review:['id','cid','rid','rating','comment']};
+const NUM=['id','rid','cid','did','oid','fid','price','pct','qty','rating','total','amount'],OPT=['did','comment','phone'];
+const EN={'food.category':['Veg','Non-Veg'],'food.available':['Y','N'],'orders.status':['Pending','Delivered','Cancelled'],'payment.method':['UPI','Card','COD'],'payment.status':['Pending','Success','Failed'],'delivery.status':['Preparing','Out for Delivery','Delivered','Cancelled']};
+const FK={food:{rid:'restaurant'},orders:{cid:'customer',did:'discount'},cart:{oid:'orders',fid:'food'},payment:{oid:'orders'},delivery:{oid:'orders'},review:{cid:'customer',rid:'restaurant'}};
+const UQ={customer:['email'],discount:['code'],payment:['oid'],delivery:['oid']};
+const TODAY=new Date().toISOString().slice(0,10),PARTNERS=['Speedy Express','QuickDrop','RoadRunner'];
+const seed=()=>({customer:[[101,'Alice Kumar','alice@gmail.com','9876500001','12 Lake Rd'],[102,'Bob Reddy','bob@gmail.com','9876500002','4 Hill St'],[103,'Carol Fernandez','carol@gmail.com','9876500003','88 Park Ave'],[104,'David Iyer','david@gmail.com','9876500004','7 MG Road']].map(a=>({id:a[0],name:a[1],email:a[2],phone:a[3],address:a[4]})),
+restaurant:[[201,'Spice Villa','North Indian',4.5,'Bengaluru'],[202,'Pizza Point','Italian',4.2,'Bengaluru'],[203,'Burger Hub','Fast Food',4.0,'Bengaluru']].map(a=>({id:a[0],name:a[1],cuisine:a[2],rating:a[3],city:a[4]})),
+food:[[301,'Chicken Biryani',250,'Non-Veg',201],[302,'Paneer Butter Masala',200,'Veg',201],[303,'Margherita Pizza',300,'Veg',202],[304,'Pepperoni Pizza',350,'Non-Veg',202],[305,'Cheese Burger',150,'Non-Veg',203],[306,'Veg Fried Rice',220,'Veg',201]].map(a=>({id:a[0],name:a[1],price:a[2],category:a[3],available:'Y',rid:a[4]})),
+discount:[{id:401,code:'WELCOME10',pct:10,expiry:'2026-12-31'},{id:402,code:'FEST20',pct:20,expiry:'2026-11-30'}],
+orders:[{id:501,cid:101,did:401,total:630,status:'Delivered',date:'2026-09-10'},{id:502,cid:102,did:null,total:650,status:'Delivered',date:'2026-09-12'},{id:503,cid:103,did:402,total:360,status:'Pending',date:'2026-09-15'},{id:504,cid:102,did:null,total:470,status:'Delivered',date:'2026-10-05'},{id:505,cid:103,did:null,total:500,status:'Delivered',date:'2026-10-08'}],
+cart:[[601,501,301,2],[602,501,302,1],[603,502,303,1],[604,502,304,1],[605,503,305,3],[606,504,301,1],[607,504,306,1],[608,505,302,1],[609,505,303,1]].map(a=>({id:a[0],oid:a[1],fid:a[2],qty:a[3]})),
+payment:[{id:701,oid:501,method:'UPI',status:'Success',amount:630},{id:702,oid:502,method:'Card',status:'Success',amount:650},{id:703,oid:503,method:'COD',status:'Pending',amount:360},{id:704,oid:504,method:'UPI',status:'Success',amount:470},{id:705,oid:505,method:'Card',status:'Success',amount:500}],
+delivery:[{id:801,oid:501,partner:'Speedy Express',status:'Delivered',address:'12 Lake Rd'},{id:802,oid:502,partner:'QuickDrop',status:'Delivered',address:'4 Hill St'},{id:803,oid:503,partner:'Speedy Express',status:'Out for Delivery',address:'88 Park Ave'},{id:804,oid:504,partner:'QuickDrop',status:'Delivered',address:'4 Hill St'},{id:805,oid:505,partner:'RoadRunner',status:'Delivered',address:'88 Park Ave'}],
+review:[{id:901,cid:101,rid:201,rating:5,comment:'Great biryani!'},{id:902,cid:102,rid:202,rating:4,comment:'Good pizza'}]});
+let db;try{db=JSON.parse(localStorage.getItem('qb2'))}catch(e){}if(!db||!db.review)db=seed();
+let saveQueue=Promise.resolve();
+let remoteEnabled=false;
+const save=()=>{const snapshot=JSON.stringify(db);try{localStorage.setItem('qb2',snapshot)}catch(e){};
+  if(remoteEnabled){saveQueue=saveQueue.then(()=>fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:snapshot}).then(r=>{if(!r.ok)throw Error('Cloud save failed');return r.json()}).catch(e=>{console.warn('QuickBite cloud save unavailable; browser copy retained.',e)}));}
+};
+const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=s=>document.querySelector(s),fm=n=>'₹'+Number(n).toFixed(2),by=(t,id)=>db[t].find(r=>r.id==id);
+function toast(m,ok=true){const d=document.createElement('div');d.id='toast';d.textContent=m;d.style.background=ok?'#1f8a4c':'#c62828';document.body.appendChild(d);setTimeout(()=>d.remove(),3500)}
+// ---------- data layer: constraints, keys, triggers ----------
+function check(t,r,self){
+ for(const c of COLS[t]){if(c=='id')continue;let v=r[c];
+  if(v===''||v==null||v!==v){if(OPT.includes(c)){r[c]=null;continue}throw Error(`${c} is required.`)}
+  if(NUM.includes(c)){v=+v;if(isNaN(v))throw Error(`${c} must be a number.`);r[c]=v}else r[c]=String(v).trim();
+  const en=EN[t+'.'+c];if(en&&!en.includes(r[c]))throw Error(`${c} must be one of: ${en.join(', ')}.`)}
+ if(t=='food'&&r.price<=0)throw Error('Price must be greater than zero.');
+ if(t=='cart'&&r.qty<=0)throw Error('Quantity must be greater than zero.');
+ if(t=='review'&&(r.rating<1||r.rating>5))throw Error('Rating must be between 1 and 5.');
+ if(t=='restaurant'&&(r.rating<0||r.rating>5))throw Error('Rating must be between 0 and 5.');
+ if(t=='discount'&&(r.pct<1||r.pct>100))throw Error('Discount must be between 1 and 100 percent.');
+ for(const c of UQ[t]||[])if(db[t].some(x=>x.id!=self&&String(x[c]).toLowerCase()==String(r[c]).toLowerCase()))throw Error(`${c} already exists: ${r[c]}.`);
+ for(const [c,p] of Object.entries(FK[t]||{}))if(r[c]!=null&&!by(p,r[c]))throw Error(`${c} ${r[c]} does not exist in ${p}.`);
+ if(t=='cart'&&by('food',r.fid).available=='N')throw Error('This item is sold out.');
+}
+function ins(t,r){r={...r};check(t,r,null);r.id=Math.max(0,...db[t].map(x=>x.id),t=='food'?300:0)+1;db[t].push(r);save();return r.id}
+function upd(t,id,c,v){const r=by(t,id),n={...r,[c]:v};check(t,n,id);Object.assign(r,n);
+ if(t=='delivery'&&c=='status'){const o=db.orders.find(x=>x.id==r.oid),p=db.payment.find(x=>x.oid==r.oid);
+  if(v=='Delivered'){o.status='Delivered';p.status='Success'}if(v=='Cancelled'){o.status='Cancelled';if(p.status=='Pending')p.status='Failed'}}
+ save()}
+function del(t,id){const kids={restaurant:[['food','rid'],['review','rid']],customer:[['orders','cid'],['review','cid']],food:[['cart','fid']],discount:[['orders','did']]}[t]||[];
+ for(const [k,c] of kids)if(db[k].some(x=>x[c]==id))throw Error(`Cannot delete: it is still used in ${k}.`);
+ if(t=='orders')['cart','payment','delivery'].forEach(k=>db[k]=db[k].filter(x=>x.oid!=id));
+ db[t]=db[t].filter(x=>x.id!=id);save()}
+// ---------- customer flow ----------
+let v='home',rid=null,cart={},vf='All',me=(()=>{try{return localStorage.getItem('qbme')||''}catch(e){return ''}})(),last=null,at='overview';
+const sub=()=>Object.entries(cart).reduce((s,[id,q])=>s+q*by('food',id).price,0),cnt=()=>Object.values(cart).reduce((a,b)=>a+b,0);
+function go(x,r){v=x;if(r)rid=r;draw();scrollTo(0,0)}
+function chg(id,d){cart[id]=Math.max(0,(cart[id]||0)+d);if(!cart[id])delete cart[id];draw()}
+function disc(code){if(!code)return null;const d=db.discount.find(x=>x.code.toUpperCase()==code.trim().toUpperCase());if(!d)throw Error('That discount code is not valid.');if(d.expiry<TODAY)throw Error('That discount code has expired.');return d}
+function place(){const snap=JSON.stringify(db);
+ try{if(!cnt())throw Error('Your cart is empty.');
+  const f=k=>$('#'+k).value.trim(),email=f('ce').toLowerCase();
+  if(!f('cn')||!email||!f('ca'))throw Error('Please enter your name, email and delivery address.');
+  if(!/^\S+@\S+\.\S+$/.test(email))throw Error('Please enter a valid email address.');
+  const d=disc(f('dc'));let c=db.customer.find(x=>x.email.toLowerCase()==email),cid;
+  if(c){c.name=f('cn');c.phone=f('cp')||c.phone;c.address=f('ca');cid=c.id}else cid=ins('customer',{name:f('cn'),email,phone:f('cp'),address:f('ca')});
+  for(const id of Object.keys(cart))if(by('food',id).available=='N')throw Error(by('food',id).name+' is sold out.');
+  const total=sub()*(1-(d?d.pct:0)/100),m=f('pm');
+  const oid=ins('orders',{cid,did:d?d.id:null,total,status:'Pending',date:TODAY});
+  Object.entries(cart).forEach(([fid,qty])=>ins('cart',{oid,fid:+fid,qty}));
+  ins('payment',{oid,method:m,status:m=='COD'?'Pending':'Success',amount:total});
+  ins('delivery',{oid,partner:PARTNERS[oid%3],status:'Preparing',address:f('ca')});
+  me=email;try{localStorage.setItem('qbme',me)}catch(e){}cart={};last=oid;go('done')}
+ catch(e){db=JSON.parse(snap);$('#msg').textContent=e.message}}
+function review(oid){const o=by('orders',oid);const f=db.cart.find(x=>x.oid==oid);
+ try{ins('review',{cid:o.cid,rid:by('food',f.fid).rid,rating:$('#rt'+oid).value,comment:$('#rc'+oid).value});toast('Thanks for your review!');draw()}catch(e){toast(e.message,false)}}
+const status=oid=>{const s=db.delivery.find(x=>x.oid==oid).status,a=['Preparing','Out for Delivery','Delivered'],i=a.indexOf(s);
+ return s=='Cancelled'?'<p class="er">Order cancelled</p>':`<div class="steps">${a.map((x,j)=>`<div class="${j<=i?'on':''}">${x}</div>`).join('')}</div>`};
+const items=oid=>db.cart.filter(c=>c.oid==oid).map(c=>`${c.qty} × ${E(by('food',c.fid).name)}`).join(', ');
+const em=r=>['🍛','🍕','🍔','🥗'][r%4];
+// ---------- graph layer: traversals that mirror the Neo4j Cypher queries ----------
+const ofood=oid=>db.cart.filter(c=>c.oid==oid).map(c=>+c.fid);
+const live=()=>db.orders.filter(o=>o.status!='Cancelled');
+const foodsOf=cid=>{const s=new Set();live().filter(o=>o.cid==cid).forEach(o=>ofood(o.id).forEach(f=>s.add(f)));return s};
+function also(fids,n=3){const have=new Set(fids.map(Number)),k={};live().forEach(o=>{const l=ofood(o.id);if(l.some(f=>have.has(f)))l.forEach(f=>{if(!have.has(f)&&by('food',f).available=='Y')k[f]=(k[f]||0)+1})});return Object.entries(k).sort((a,b)=>b[1]-a[1]).slice(0,n).map(([f,c])=>({f:by('food',f),c}))}
+function similar(cid){const m=foodsOf(cid);return db.customer.filter(c=>c.id!=cid).map(c=>({c,n:[...foodsOf(c.id)].filter(f=>m.has(f)).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n)}
+function pick(cid){const m=foodsOf(cid),k={};similar(cid).forEach(x=>foodsOf(x.c.id).forEach(f=>{if(!m.has(f)&&by('food',f).available=='Y')k[f]=(k[f]||0)+x.n}));return Object.entries(k).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([f,c])=>({f:by('food',f),c}))}
+function suggestR(cid){const t=new Set([...foodsOf(cid)].map(f=>by('food',f).rid)),k={};similar(cid).forEach(x=>foodsOf(x.c.id).forEach(f=>{const r=by('food',f).rid;if(!t.has(r))k[r]=(k[r]||0)+x.n}));return Object.entries(k).sort((a,b)=>b[1]-a[1]).map(([r,n])=>({r:by('restaurant',r),n}))}
+function gpath(a,b){const adj={},ad=(x,y)=>{(adj[x]=adj[x]||[]).push(y);(adj[y]=adj[y]||[]).push(x)};
+ live().forEach(o=>{ad('c'+o.cid,'o'+o.id);ofood(o.id).forEach(f=>ad('o'+o.id,'f'+f))});db.food.forEach(f=>ad('f'+f.id,'r'+f.rid));
+ const A='c'+a,B='c'+b,pv={[A]:null},q=[A];while(q.length){const x=q.shift();if(x==B)break;(adj[x]||[]).forEach(y=>{if(!(y in pv)){pv[y]=x;q.push(y)}})}
+ if(!(B in pv))return null;const p=[];for(let x=B;x;x=pv[x])p.unshift(x);return p}
+const nm=k=>({c:()=>by('customer',k.slice(1)).name,o:()=>'Order #'+k.slice(1),f:()=>by('food',k.slice(1)).name,r:()=>by('restaurant',k.slice(1)).name}[k[0]])();
+const recBox=(t,l)=>l.length?`<div class="card"><b>${t}</b>${l.map(x=>`<div class="food"><div><b>${E(x.f.name)}</b><br><span class="s">${fm(x.f.price)} · ${E(by('restaurant',x.f.rid).name)}</span></div><button class="btn" onclick="chg(${x.f.id},1)">Add</button></div>`).join('')}</div>`:'';
+let gp=[101,103],gu=101;
+const sg=(k,x)=>{gp[k]=+x;draw()},sc=x=>{gu=+x;draw()};
+function gv(){const C=db.customer,F=db.food,R=db.restaurant,y=(i,n)=>30+i*(340/Math.max(1,n-1)),P={};
+ C.forEach((c,i)=>P['c'+c.id]=[120,y(i,C.length)]);F.forEach((f,i)=>P['f'+f.id]=[380,y(i,F.length)]);R.forEach((r,i)=>P['r'+r.id]=[620,y(i,R.length)]);
+ const ln=(a,b,cl,w,o)=>`<line x1="${P[a][0]}" y1="${P[a][1]}" x2="${P[b][0]}" y2="${P[b][1]}" stroke="${cl}" stroke-width="${w}" opacity="${o}"/>`;
+ const pr=new Set();live().forEach(o=>ofood(o.id).forEach(f=>pr.add('c'+o.cid+'|f'+f)));
+ const path=gpath(gp[0],gp[1]),pn=path?path.filter(k=>k[0]!='o'):[];
+ const nd=(k,t,cl)=>{const [x,yy]=P[k],a=k[0]=='r'?'start':k[0]=='c'?'end':'middle';return `<circle cx="${x}" cy="${yy}" r="9" fill="${cl}"/><text x="${x+(k[0]=='r'?14:k[0]=='c'?-14:0)}" y="${yy+(k[0]=='f'?-14:4)}" font-size="11" fill="currentColor" text-anchor="${a}">${E(t)}</text>`};
+ const svg=`<svg viewBox="0 0 760 400" style="width:100%;color:var(--tx)">${[...pr].map(e=>{const [a,b]=e.split('|');return ln(a,b,'var(--mu)',1,.5)}).join('')}${F.map(f=>ln('f'+f.id,'r'+f.rid,'var(--bd)',1.5,1)).join('')}${pn.slice(1).map((k,i)=>ln(pn[i],k,'var(--ac)',4,1)).join('')}${C.map(c=>nd('c'+c.id,c.name,'var(--ac)')).join('')}${F.map(f=>nd('f'+f.id,f.name,'var(--ok)')).join('')}${R.map(r=>nd('r'+r.id,r.name,'var(--tx)')).join('')}</svg>`;
+ const sel=(cur,fn)=>`<select onchange="${fn}">${C.map(c=>`<option value="${c.id}" ${c.id==cur?'selected':''}>${E(c.name)}</option>`).join('')}</select>`;
+ const nodes=C.length+R.length+F.length+db.discount.length+db.orders.length+db.payment.length+db.delivery.length,
+ rels=db.orders.length*2+db.cart.length+F.length+db.orders.filter(o=>o.did).length+db.payment.length+db.delivery.length+db.review.length;
+ const sm=similar(gu),sr=suggestR(gu),pk=pick(gu);
+ const cy=t=>`<pre style="margin:8px 0 0;white-space:pre-wrap;font-size:12px;color:var(--mu)">${E(t)}</pre>`;
+ return `<div class="stats">${[[nodes,'Nodes'],[rels,'Relationships'],[db.cart.length,'CONTAINS links'],[db.review.length,'REVIEWED links']].map(a=>`<div class="card stat"><b>${a[0]}</b>${a[1]}</div>`).join('')}</div>
+ <div class="card"><b>Graph view</b><div class="s" style="margin:0">Customers → foods they ordered → restaurants that offer them. The red line is the shortest path chosen below.</div>${svg}</div>
+ <div class="two"><div class="card"><b>Customers with similar taste</b><div style="margin-top:8px">${sel(gu,'sc(this.value)')}</div>
+ ${sm.map(x=>`<div class="row"><span>${E(x.c.name)}</span><span>${x.n} shared dish${x.n>1?'es':''}</span></div>`).join('')||'<p class="s">No similar customers yet.</p>'}
+ <b>Restaurants to try</b>${sr.map(x=>`<div class="row"><span>${E(x.r.name)}</span><span>score ${x.n}</span></div>`).join('')||'<p class="s">Nothing new to suggest.</p>'}
+ <b>Dishes to try</b>${pk.map(x=>`<div class="row"><span>${E(x.f.name)}</span><span>score ${x.c}</span></div>`).join('')||'<p class="s">Nothing new to suggest.</p>'}</div>
+ <div class="card"><b>Shortest path between two customers</b><div style="margin-top:8px">${sel(gp[0],'sg(0,this.value)')}${sel(gp[1],'sg(1,this.value)')}</div>
+ ${path?`<p>${path.map(k=>`<span class="tag">${E(nm(k))}</span>`).join(' → ')}</p><div class="s">${path.length>>1} hops</div>`:'<p class="s">These customers are not connected.</p>'}</div></div>
+ <div class="card"><b>Cypher behind these results</b>${cy("// customers who ordered this also ordered\nMATCH (:Food {id:$f})<-[:CONTAINS]-(:Order)-[:CONTAINS]->(o:Food)\nRETURN o.name, count(*) AS times ORDER BY times DESC")}${cy("// customers with similar taste\nMATCH (c:Customer {id:$id})-[:PLACED]->(:Order)-[:CONTAINS]->(f:Food)<-[:CONTAINS]-(:Order)<-[:PLACED]-(o:Customer)\nWHERE o <> c RETURN o.name, count(DISTINCT f) AS shared ORDER BY shared DESC")}${cy("// shortest path\nMATCH p = shortestPath((a:Customer {id:$a})-[*..8]-(b:Customer {id:$b})) RETURN p")}<p class="s" style="margin:8px 0 0">The full Neo4j script is in quickbite_neo4j.cypher. This page runs the same traversals in the browser.</p></div>`}
+const V={
+home(){return `<div class="hero"><h2>Hungry? We’ll deliver.</h2><div>Order from your favourite restaurants and track it to your door.</div></div>
+ <h2>Restaurants near you</h2><p class="s">Pick a restaurant to see its menu.</p><div class="g">${db.restaurant.map(r=>`<div class="card rc" onclick="go('menu',${r.id})"><div class="em">${em(r.id)}</div><b>${E(r.name)}</b><div class="s" style="margin:0">${E(r.cuisine)} · ${E(r.city)}</div><span class="tag">★ ${r.rating}</span> <span class="tag">${db.food.filter(f=>f.rid==r.id&&f.available=='Y').length} items</span></div>`).join('')}</div>`},
+menu(){const r=by('restaurant',rid),rv=db.review.filter(x=>x.rid==rid);
+ return `<button class="btn" onclick="go('home')">← All restaurants</button><h2 style="margin-top:12px">${E(r.name)}</h2><p class="s">${E(r.cuisine)} · ${E(r.city)} · ★ ${r.rating}</p>
+ <div class="tabs">${['All','Veg','Non-Veg'].map(x=>`<button class="btn ${vf==x?'on':''}" onclick="vf='${x}';draw()">${x}</button>`).join('')}</div>
+ <div class="two"><div class="card">${db.food.filter(f=>f.rid==rid&&(vf=='All'||f.category==vf)).map(f=>`<div class="food"><div><b>${E(f.name)}</b><br><span class="tag">${f.category}</span> ${fm(f.price)}</div>${f.available=='Y'?`<div class="q"><button onclick="chg(${f.id},-1)">−</button><b>${cart[f.id]||0}</b><button onclick="chg(${f.id},1)">+</button></div>`:'<span class="tag">Sold out</span>'}</div>`).join('')||'<p class="s">No items.</p>'}</div>
+ <div><div class="card"><b>Your cart (${cnt()})</b><div class="s"></div><div class="row"><span>Subtotal</span><b>${fm(sub())}</b></div><button class="btn p w" onclick="go('cart')">View cart</button></div>${recBox('Customers also ordered',also(Object.keys(cart)))}
+ <div class="card"><b>Reviews</b>${rv.map(x=>`<div class="food"><div>${'★'.repeat(x.rating)} <span class="s">${E(x.comment||'')}</span></div></div>`).join('')||'<p class="s">No reviews yet.</p>'}</div></div></div>`},
+cart(){return `<h2>Your cart</h2><p class="s">Review your items, then continue to checkout.</p><div class="card">${Object.entries(cart).map(([id,q])=>{const f=by('food',id);return `<div class="food"><div><b>${E(f.name)}</b><br>${fm(f.price)} · ${E(by('restaurant',f.rid).name)}</div><div class="q"><button onclick="chg(${id},-1)">−</button><b>${q}</b><button onclick="chg(${id},1)">+</button><b style="min-width:80px;text-align:right">${fm(q*f.price)}</b></div></div>`}).join('')||'<p class="s">Your cart is empty.</p>'}
+ <div class="row"><b>Subtotal</b><b>${fm(sub())}</b></div></div>${recBox('Customers also ordered',also(Object.keys(cart)))}<button class="btn" onclick="go('home')">Add more food</button> ${cnt()?'<button class="btn p" onclick="go(\'checkout\')">Checkout</button>':''}`},
+checkout(){const c=db.customer.find(x=>x.email==me)||{};return `<h2>Checkout</h2><p class="s">Tell us where to deliver.</p><div class="two"><div class="card">
+ <label>Full name</label><input id="cn" value="${E(c.name)}" placeholder="Your name"><label>Email</label><input id="ce" value="${E(me)}" type="email" placeholder="you@example.com">
+ <label>Phone</label><input id="cp" value="${E(c.phone)}" placeholder="Optional"><label>Delivery address</label><textarea id="ca" rows="2" placeholder="House no, street, area">${E(c.address)}</textarea>
+ <label>Discount code</label><input id="dc" placeholder="e.g. WELCOME10"><label>Payment method</label><select id="pm"><option value="UPI">UPI</option><option value="Card">Credit / Debit card</option><option value="COD">Cash on delivery</option></select></div>
+ <div><div class="card"><b>Order summary</b>${Object.entries(cart).map(([id,q])=>`<div class="row"><span>${q} × ${E(by('food',id).name)}</span><span>${fm(q*by('food',id).price)}</span></div>`).join('')}<div class="row"><b>Subtotal</b><b>${fm(sub())}</b></div>
+ <button class="btn p w" onclick="place()">Place order</button><p id="msg" class="er" style="margin:8px 0 0"></p></div></div></div>`},
+done(){const o=by('orders',last),d=by('delivery',db.delivery.find(x=>x.oid==last).id);return `<div class="card"><h2 class="ok">✓ Order #${o.id} confirmed</h2><p class="s">Thanks, ${E(by('customer',o.cid).name)}! Your food is being prepared.</p>${status(o.id)}
+ <div class="row"><span>Items</span><span>${items(o.id)}</span></div><div class="row"><span>Total paid</span><b>${fm(o.total)}</b></div><div class="row"><span>Payment</span><span>${db.payment.find(x=>x.oid==o.id).method}</span></div><div class="row"><span>Delivery partner</span><span>${d.partner}</span></div><div class="row"><span>Delivering to</span><span>${E(d.address)}</span></div></div>
+ ${recBox('You may also like',also(ofood(last)))}<button class="btn" onclick="go('orders')">Track my orders</button> <button class="btn p" onclick="go('home')">Order more</button>`},
+orders(){const c=db.customer.find(x=>x.email==me),os=c?db.orders.filter(o=>o.cid==c.id).reverse():[];
+ return `<h2>My orders</h2><p class="s">Enter your email to see your orders.</p><div class="card"><div style="display:flex;gap:8px"><input id="me" value="${E(me)}" placeholder="you@example.com" style="margin:0"><button class="btn p" onclick="me=$('#me').value.trim().toLowerCase();try{localStorage.setItem('qbme',me)}catch(e){}draw()">Find</button></div></div>
+ ${c?recBox('Picked for you',pick(c.id)):''}${me&&!c?'<p class="er">No customer found with that email.</p>':''}${os.map(o=>{const rv=db.review.some(x=>x.cid==o.cid&&x.rid==by('food',db.cart.find(k=>k.oid==o.id).fid).rid);return `<div class="card"><b>Order #${o.id}</b> <span class="tag">${o.date}</span> <span class="st">${o.status}</span>${status(o.id)}<div class="row"><span>${items(o.id)}</span><b>${fm(o.total)}</b></div>
+ ${o.status=='Delivered'&&!rv?`<div style="display:flex;gap:8px;margin-top:8px"><select id="rt${o.id}" style="width:90px;margin:0"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><input id="rc${o.id}" placeholder="Rate your meal" style="margin:0"><button class="btn" onclick="review(${o.id})">Review</button></div>`:''}</div>`}).join('')}`},
+admin(){const T=Object.keys(COLS),tabs=['overview','graph',...T];let h=`<h2>Admin console</h2><p class="s">Manage restaurants, menus, orders and customers.</p><div class="tabs">${tabs.map(t=>`<button class="btn ${at==t?'on':''}" onclick="at='${t}';draw()">${t=='orders'?'order_details':t=='graph'?'graph insights':t}</button>`).join('')}</div>`;
+ if(at=='overview'){const rev=db.orders.filter(o=>o.status!='Cancelled').reduce((s,o)=>s+o.total,0),top={};db.cart.forEach(c=>top[c.fid]=(top[c.fid]||0)+c.qty);
+  const rr=db.restaurant.map(r=>[r.name,db.cart.filter(c=>by('food',c.fid).rid==r.id).reduce((s,c)=>s+c.qty*by('food',c.fid).price,0)]);
+  return h+`<div class="stats">${[[db.orders.length,'Orders'],[fm(rev),'Revenue'],[db.customer.length,'Customers'],[db.food.length,'Menu items'],[fm(db.orders.length?rev/db.orders.length:0),'Average order']].map(a=>`<div class="card stat"><b>${a[0]}</b>${a[1]}</div>`).join('')}</div>
+  <div class="two"><div class="card"><b>Sales by restaurant</b>${rr.map(a=>`<div class="row"><span>${E(a[0])}</span><span>${fm(a[1])}</span></div>`).join('')}</div>
+  <div class="card"><b>Best sellers</b>${Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([id,q])=>`<div class="row"><span>${E(by('food',id).name)}</span><span>${q} sold</span></div>`).join('')}</div></div>
+  <div class="card"><b>Customers who have not ordered yet</b><div class="s">${db.customer.filter(c=>!db.orders.some(o=>o.cid==c.id)).map(c=>E(c.name)).join(', ')||'None'}</div></div>`}
+ if(at=='graph')return h+gv();
+ const cs=COLS[at];return h+`<div class="card scroll"><table><tr>${cs.map(c=>`<th>${c}</th>`).join('')}<th></th></tr>${db[at].map(r=>`<tr>${cs.map(c=>{const en=EN[at+'.'+c];
+  if(c=='id')return `<td>${r.id}</td>`;if(en)return `<td><select onchange="ed('${at}',${r.id},'${c}',this.value)">${en.map(o=>`<option ${o==r[c]?'selected':''}>${o}</option>`).join('')}</select></td>`;
+  return `<td class="ed" onclick="sed(this,'${at}',${r.id},'${c}')">${E(r[c]??'—')}</td>`}).join('')}<td><button class="btn" onclick="rm('${at}',${r.id})">${pend==at+r.id?'Click again to confirm':'Delete'}</button></td></tr>`).join('')}</table></div>
+  <div class="card"><b>Add to ${at=='orders'?'order_details':at}</b><div class="g" style="margin-top:8px">${cs.slice(1).map(c=>{const en=EN[at+'.'+c];return `<div><label>${c}</label>${en?`<select id="n_${c}">${en.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input id="n_${c}" placeholder="${c}">`}</div>`}).join('')}</div><button class="btn p" onclick="add()">Add row</button></div>`}};
+function sed(td,t,id,c){if(td.querySelector('input'))return;const i=document.createElement('input');i.value=by(t,id)[c]??'';i.style.width='140px';td.textContent='';td.appendChild(i);i.focus();i.onkeydown=e=>{if(e.key=='Enter')ed(t,id,c,i.value);if(e.key=='Escape')draw()};i.onblur=()=>setTimeout(()=>{if(td.contains(i))draw()},150)}
+function ed(t,id,c,val){try{upd(t,id,c,val);toast('Saved')}catch(e){toast(e.message,false)}draw()}
+let pend='';function rm(t,id){if(pend!=t+id){pend=t+id;draw();return}pend='';try{del(t,id);toast('Deleted')}catch(e){toast(e.message,false)}draw()}
+function add(){const r={};COLS[at].slice(1).forEach(c=>r[c]=$('#n_'+c).value);try{ins(at,r);toast('Row added')}catch(e){toast(e.message,false)}draw()}
+function draw(){const m={home:'home',menu:'home',cart:'cart',checkout:'cart',done:'orders',orders:'orders',admin:'admin'}[v];
+ $('#nav').innerHTML=[['home','Restaurants'],['cart','Cart'+(cnt()?` (${cnt()})`:'')],['orders','My orders'],['admin','Admin']].map(([k,l])=>`<button class="${m==k?'on':''}" onclick="go('${k}')">${l}</button>`).join('');
+ $('#app').innerHTML=V[v]()}
+async function boot(){
+  try{
+    const cfg=await fetch('/api/config');
+    if(cfg.ok){const c=await cfg.json();remoteEnabled=Boolean(c.databaseEnabled);}
+  }catch(e){remoteEnabled=false;}
+  if(remoteEnabled){
+    try{
+      const r=await fetch('/api/state');
+      if(r.ok){const remote=await r.json();if(remote&&remote.customer&&remote.restaurant&&remote.food){db=remote;try{localStorage.setItem('qb2',JSON.stringify(db))}catch(e){};draw();toast('Connected to cloud database');return;}}
+      const h=await fetch('/api/health');
+      if(h.ok){draw();save();toast('Initial data saved to cloud database');return;}
+    }catch(e){console.warn('QuickBite cloud database unavailable; using browser copy.',e);}
+  }
+  draw();
+}
+boot();
+</script>
+
+</body></html>

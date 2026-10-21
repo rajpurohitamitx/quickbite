@@ -1,0 +1,10 @@
+{
+  "name": "quickbite-vercel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "QuickBite food delivery demo deployable on Vercel",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "neo4j-driver": "^5.28.1"
+  }
+}
